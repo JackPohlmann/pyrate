@@ -7,15 +7,15 @@ This is the file that should handle any settings for atm/bg.
 
 """
 
-import core
+import pyrate.core
 
 
 def run():
     # Run the sub-modules
-    core.atmosphere.run()
-    core.background.run()
+    pyrate.core.atmosphere.run()
+    pyrate.core.background.run()
 
     # Sign and return
-    core.HDSTRUCT['last'].append(__name__)
+    pyrate.core.HDSTRUCT['last'].append(__name__)
 
     return

@@ -6,38 +6,86 @@ Need to keep track of:
     2)  Atm Profile
 """
 
+import os
 
+import pyrate.core
+import pyrate.resources
 
-import core
-import resources
-
-
-# Function shortnames
-rpaparams = resources.plugins.atmosphere.params
-#rpbparams: background plugin
-#rptparams: target plugin
-
+# ---------- Shorthands ---------- #
+# Functions
+def plug_params(module, plugin):
+    return pyrate.resources.plugins.params(*[module, plugin])
+# Keys
+plug_key = pyrate.core.plug_key
+input_key = pyrate.core.input_key
+atm_key = 'atmosphere'
+bg_key = 'background'
+targ_key = 'target'
+# Recipe template
 template = {
-        core.plug_key: {
-                core.atmosphere.__name__: 'rttov',
-                core.background.__name__: 'lambertian',
-                core.target.__name__: '2d',
+        plug_key: {
+                atm_key: '',
+                bg_key: '',
+                targ_key: '',
             },
-        core.input_key: {
-                core.atmosphere.__name__: rpaparams('rttov'),
+        input_key: {
+                atm_key: pyrate.resources.plugins._params,
             },
     }
 
-            
-class Recipe():
-    """PyRATE recipe object."""
-    def __init__(self, *args):
-        base = args[0] if args else template
-        setattr(self, core.plug_key, self.subRecipe(base[core.plug_key]))
-        setattr(self, core.input_key, self.subRecipe(base[core.input_key]))
+default = {
+        plug_key: {
+                atm_key: 'rttov',
+                bg_key: 'lambertian',
+                targ_key: '2d',
+            },
+        input_key: {
+                atm_key: plug_params(atm_key, 'rttov'),
+            },
+    }
+
+
+class namedDict():
+    """Dictionaries with naming convention built in.
+
+    Items can be called or set using the traditional dictionary method 
+    dict[key] = value or can be done using the object named convention
+    dict.key = value.
+    """
+    def __init__(self, **d):
+        self.__dict__ = d
+        return
+    
+    def keys(self):
+        return list(self.__dict__.keys())
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
         return
 
-    class subRecipe():
-        def __init__(self, d):
-            self.__dict__ = d
-            return
+            
+class Recipe(namedDict):
+    """PyRATE recipe object."""
+    def __init__(self, *args):
+        base = args[0] if args else default
+        super().__init__(**base)
+        # Plugins
+        self[plug_key] = namedDict(**self[plug_key])
+        # Inputs
+        self[input_key] = namedDict(**self[input_key])
+        for key in self[input_key].keys():
+            self[input_key][key] = namedDict(**self[input_key][key])
+        return
+    def loadDefaultInputs(self):
+        """Load the default plugin inputs."""
+        for key in self[plug_key].keys():
+            defs = plug_params(key, self[plug_key][key])
+            for cmd in self[input_key][key].keys():
+                self[input_key][key][cmd] = defs[cmd]
+        return
+    def run(self):
+        """Runs the PyRATE simulation."""
+        pass

@@ -2,7 +2,7 @@
 Secretary module
 """
 
-import resources.secretary.json_manager as jm
+import pyrate.resources.secretary.json_manager as jm
 
 
 load = jm.load

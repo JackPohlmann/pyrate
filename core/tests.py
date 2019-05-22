@@ -7,27 +7,26 @@ This is an ugly way to do this. Need to exploit python's unittest module.
 
 """
 
-import core
 
 
 
-class testAtmOut(core.atmosphere.BaseAtmosphere):
+class testAtmOut(pyrate.core.atmosphere.BaseAtmosphere):
     def __init__(self):
-        for att in core.atmosphere.BaseAtmosphere.required_attributes:
+        for att in pyrate.core.atmosphere.BaseAtmosphere.required_attributes:
             self.__dict__[att] = True
         super().__init__()
         return
 
-class testBgOut(core.background.BaseBackground):
+class testBgOut(pyrate.core.background.BaseBackground):
     def __init__(self):
-        for att in core.background.BaseBackground.required_attributes:
+        for att in pyrate.core.background.BaseBackground.required_attributes:
             self.__dict__[att] = True
         super().__init__()
         return
 
-class testTargOut(core.target.BaseTarget):
+class testTargOut(pyrate.core.target.BaseTarget):
     def __init__(self):
-        for att in core.target.BaseTarget.required_attributes:
+        for att in pyrate.core.target.BaseTarget.required_attributes:
             self.__dict__[att] = True
         super().__init__()
         return
@@ -50,35 +49,35 @@ def test_all():
         return simple_plugin
 
     simple_plugins = {
-        core.atmosphere.__name__: simple_plugin_gen(atm),
-        core.background.__name__: simple_plugin_gen(bg),
-        core.target.__name__: simple_plugin_gen(targ),
+        pyrate.core.atmosphere.__name__: simple_plugin_gen(atm),
+        pyrate.core.background.__name__: simple_plugin_gen(bg),
+        pyrate.core.target.__name__: simple_plugin_gen(targ),
     }
 
     atm_dict = {
-        core.plug_key: simple_plugins[core.atmosphere.__name__],
-        core.input_key: {'basic':"lettuce"},
+        pyrate.core.plug_key: simple_plugins[pyrate.core.atmosphere.__name__],
+        pyrate.core.input_key: {'basic':"lettuce"},
     }
 
     bg_dict = {
-        core.plug_key: simple_plugins[core.background.__name__],
-        core.input_key: {'basic':"lettuce"},
+        pyrate.core.plug_key: simple_plugins[pyrate.core.background.__name__],
+        pyrate.core.input_key: {'basic':"lettuce"},
     }
 
     targ_dict = {
-        core.plug_key: simple_plugins[core.target.__name__],
-        core.input_key: {'basic':"lettuce"},
+        pyrate.core.plug_key: simple_plugins[pyrate.core.target.__name__],
+        pyrate.core.input_key: {'basic':"lettuce"},
     }
 
     instruct = {
-        core.atmosphere.__name__: atm_dict,
-        core.background.__name__: bg_dict,
-        core.target.__name__: targ_dict,
+        pyrate.core.atmosphere.__name__: atm_dict,
+        pyrate.core.background.__name__: bg_dict,
+        pyrate.core.target.__name__: targ_dict,
     }
 
-    core.init(instruct)
+    pyrate.core.init(instruct)
 
-    out = core.run()
+    out = pyrate.core.run()
 
     print("Okay!")
     return out

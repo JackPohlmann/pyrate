@@ -1,5 +1,5 @@
 """
-Initialize core modules.
+Initialize pyrate.core modules.
 
 Houses the main run function.
 
@@ -7,12 +7,12 @@ Houses the main run function.
 
 import sys
 
-import core.incoming
-import core.atmosphere
-import core.background
-import core.outgoing
-import core.target
-import core.tests
+import pyrate.core.incoming
+import pyrate.core.atmosphere
+import pyrate.core.background
+import pyrate.core.outgoing
+import pyrate.core.target
+#import pyrate.core.tests
 
 
 # These variables should be wrapped up in params and comp_dict
@@ -50,9 +50,9 @@ def run():
 
     try:
         """run stuff."""
-        core.incoming.run()
+        pyrate.core.incoming.run()
         HDSTRUCT['last'].append(__name__)
-        core.outgoing.run()
+        pyrate.core.outgoing.run()
         HDSTRUCT['last'].append(__name__)
     except:
         e = sys.exc_info()[0]
@@ -71,7 +71,7 @@ def run():
 # Test function; super basic
 def test(key='all'):
     if key=='all':
-        dotest = core.tests.test_all
+        dotest = pyrate.core.tests.test_all
     return dotest()
 
 

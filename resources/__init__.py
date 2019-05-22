@@ -1,10 +1,11 @@
 import os
 import docker
 
-import resources.plugins
-import resources.plugins.atmosphere
-
-# import resources.secretary as sec
+import pyrate.resources.plugins
+import pyrate.resources.plugins.atmosphere
+import pyrate.resources.plugins.background
+import pyrate.resources.plugins.target
+# import pyrate.resources.secretary as sec
 
 # Globals
 # Docker client

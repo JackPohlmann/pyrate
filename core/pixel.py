@@ -13,10 +13,10 @@ import numpy as np
 import warnings
 
 try:
-    import core.saig as saig
+    import pyrate.core.saig as saig
 except ImportError as e:
     print(e)
-    raise ImportError("Meant to be imported as a part of core.")
+    raise ImportError("Meant to be imported as a part of pyrate.core.")
 
 
 class SPAnchor():

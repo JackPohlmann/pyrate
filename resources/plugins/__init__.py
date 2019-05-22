@@ -1,7 +1,13 @@
 import abc
 import importlib as il
 
+# Load a plugin
+def load(module, plugin):
+    tmp = il.import_module('.'.join([__name__, module]))
+    tmp.load(plugin)
+    return
 
+# Run a plugin
 def run(plugin, params):
     """General function for running a plugin."""
     plugin.load(list(params['load']['args'].values()),params['load']['kwargs'])
@@ -24,10 +30,10 @@ def params(*args):
     if not args:
         return _params
     elif len(args)==1:
-        tmp = il.import_module('.'.join(['resources.plugins', args[0]]))
+        tmp = il.import_module('.'.join([__name__, args[0]]))
     else:
         module, plugin = args
-        tmp = il.import_module('.'.join(['resources.plugins', module, plugin]))
+        tmp = il.import_module('.'.join([__name__, module, plugin]))
     return tmp._params
     
 

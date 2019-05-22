@@ -1,6 +1,7 @@
 import abc
+import os
 
-import core
+import pyrate.core
 
 
 # Keys
@@ -32,24 +33,24 @@ class BaseAtmosphere(abc.ABC):
         return
     @classmethod
     def help(cls,):
-        core.base_help(cls)
+        pyrate.core.base_help(cls)
         return
 
 
 # This one
 def run():
     # Load data/plugin
-    atm_dict = core.INSTRUCT[__name__]
-    plugin = atm_dict[core.plug_key]     # This should be a function
-    inputs = atm_dict[core.input_key]
+    atm_dict = pyrate.core.INSTRUCT[__name__]
+    plugin = atm_dict[pyrate.core.plug_key]     # This should be a function
+    inputs = atm_dict[pyrate.core.input_key]
 
     # Run and check
     atmosphere = plugin(inputs)
     assert isinstance(atmosphere, BaseAtmosphere), "Plugin must return a BaseAtmosphere object."
 
     # Set outputs
-    core.HDSTRUCT[down_key] = getattr(atmosphere, down_key)
-    core.HDSTRUCT[up_key] = getattr(atmosphere, up_key)
-    core.HDSTRUCT[tau_key] = getattr(atmosphere, tau_key)
+    pyrate.core.HDSTRUCT[down_key] = getattr(atmosphere, down_key)
+    pyrate.core.HDSTRUCT[up_key] = getattr(atmosphere, up_key)
+    pyrate.core.HDSTRUCT[tau_key] = getattr(atmosphere, tau_key)
     
     return

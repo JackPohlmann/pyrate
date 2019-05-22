@@ -1,7 +1,7 @@
 import importlib as il
 
-import resources.plugins as plugins
-from core.atmosphere import BaseAtmosphere
+import pyrate.resources.plugins as plugins
+from pyrate.core.atmosphere import BaseAtmosphere
 
 
 class BaseAtmPlugin(plugins.BasePlugin):
@@ -22,9 +22,8 @@ class Atmosphere(BaseAtmosphere):
 
 def load(plugname, **kwargs):
     """Load a plugin."""
-    modpath = 'resources.plugins.atmosphere.'
     global plugMod
-    plugMod = il.import_module(''.join([modpath, plugname]))
+    plugMod = il.import_module('.'.join([__name__, plugname]))
     global Plugin
     Plugin = plugMod.Plugin()
     Plugin.start(**kwargs)

@@ -1,7 +1,8 @@
 import abc
 
-import core
+import pyrate.core
 
+__name__ = 'target'
 
 # Keys
 targ_key = 'target'
@@ -28,27 +29,27 @@ class BaseTarget(abc.ABC):
         return
     @classmethod
     def help(cls,):
-        core.base_help(cls)
+        pyrate.core.base_help(cls)
         return
 
 
 # Run the simulation
 def run():
     # Set up plugin
-    targ_dict = core.INSTRUCT[__name__]
-    plugin = targ_dict[core.plug_key]
-    inputs = targ_dict[core.input_key]
+    targ_dict = pyrate.core.INSTRUCT[__name__]
+    plugin = targ_dict[pyrate.core.plug_key]
+    inputs = targ_dict[pyrate.core.input_key]
 
     # Append previously computed values
-    inputs[core.down_key] = core.HDSTRUCT[core.down_key]
-    inputs[core.background.bg_key] = core.HDSTRUCT[core.background.bg_key]
+    inputs[pyrate.core.down_key] = pyrate.core.HDSTRUCT[pyrate.core.down_key]
+    inputs[pyrate.core.background.bg_key] = pyrate.core.HDSTRUCT[pyrate.core.background.bg_key]
 
     # Run and check
     target = plugin(inputs)
     assert isinstance(target, BaseTarget), "Plugin must return a BaseTarget object."
 
     # Set output
-    core.HDSTRUCT[targ_key] = target.__dict__[targ_key]
-    core.HDSTRUCT[proj_key] = target.__dict__[proj_key]
+    pyrate.core.HDSTRUCT[targ_key] = target.__dict__[targ_key]
+    pyrate.core.HDSTRUCT[proj_key] = target.__dict__[proj_key]
 
     return

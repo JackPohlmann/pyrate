@@ -4,9 +4,9 @@ import h5py
 import numpy as np
 import atexit
 
-import resources.plugins.atmosphere as atm
-from resources import DOCK_CLIENT 
-import resources.plugins.atmosphere.rttov.app.interface as ri
+import pyrate.resources.plugins.atmosphere as atm
+from pyrate.resources import DOCK_CLIENT 
+import pyrate.resources.plugins.atmosphere.rttov.app.interface as ri
 
 
 # ---------- Module Vars ---------- #

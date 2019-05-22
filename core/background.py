@@ -1,6 +1,6 @@
 import abc
 
-import core
+import pyrate.core
 
 
 # Keys
@@ -26,7 +26,7 @@ class BaseBackground(abc.ABC):
         return
     @classmethod
     def help(cls,):
-        core.base_help(cls)
+        pyrate.core.base_help(cls)
         return
 
 
@@ -41,10 +41,10 @@ def run():
     """
 
     # Load data/plugin
-    bg_dict = core.INSTRUCT[__name__]
-    plugin = bg_dict[core.plug_key]
-    inputs = bg_dict[core.input_key]
-    inputs[core.atmosphere.down_key] = core.HDSTRUCT[core.atmosphere.down_key]
+    bg_dict = pyrate.core.INSTRUCT[__name__]
+    plugin = bg_dict[pyrate.core.plug_key]
+    inputs = bg_dict[pyrate.core.input_key]
+    inputs[pyrate.core.atmosphere.down_key] = pyrate.core.HDSTRUCT[pyrate.core.atmosphere.down_key]
 
     # Run and check
     """Need to use the plugins here."""
@@ -52,6 +52,6 @@ def run():
     assert isinstance(background, BaseBackground), "Plugin must return a BaseBackground object."
 
     # Set outputs
-    core.HDSTRUCT[bg_key] = getattr(background, bg_key)
+    pyrate.core.HDSTRUCT[bg_key] = getattr(background, bg_key)
 
     return

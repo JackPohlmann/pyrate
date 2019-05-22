@@ -1,0 +1,9 @@
+{
+    "atmosphere": [
+        "rttov"
+    ],
+    "target": [
+        "brdf",
+        "lambertian"
+    ]
+}

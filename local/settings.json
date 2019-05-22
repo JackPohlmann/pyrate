@@ -1,0 +1,11 @@
+{
+    "defaults": {
+        "plugins": {
+            "atmosphere": "rttov",
+            "pixel": {
+                "background": "lambertian",
+                "target": "lambertian"
+            }
+        }
+    }
+}

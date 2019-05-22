@@ -1,0 +1,16 @@
+# IDE settings
+.vscode/
+.idea/
+.DS_Store
+
+# Pycache
+__pycache__/
+
+# Local data
+local/*
+
+# hdf5 files
+*.h5
+
+# Unused data
+unused/

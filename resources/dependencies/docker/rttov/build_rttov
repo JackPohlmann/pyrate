@@ -1,0 +1,14 @@
+#!/bin/bash
+# Fetch, if necessary, and install RTTOV
+if [ ! -d "./${RTTOV_INSTALL_DIR}" ]; then ./download_rttov12; fi
+mv ./${RTTOV_INSTALL_DIR} ${RTTOV_INSTALL_DIR}
+rm "${RTTOV_INSTALL_DIR}/build/Makefile.local"
+mv "./Makefile.local" "${RTTOV_INSTALL_DIR}/build/Makefile.local"
+export LD_LIBRARY_PATH=/usr/local/hdf5/lib
+cd "${RTTOV_INSTALL_DIR}/src"
+../build/Makefile.PL RTTOV_HDF=1 RTTOV_F2PY=1
+make ARCH=gfortran
+for PYEXT in 2.7 3.7; do
+	ln -s "${RTTOV_INSTALL_DIR}/wrapper/pyrttov" "/usr/local/lib/python${PYEXT}"
+	ln -s "${RTTOV_INSTALL_DIR}/wrapper/rttov_wrapper_f2py.so" "/usr/local/lib/python${PYEXT}"
+done

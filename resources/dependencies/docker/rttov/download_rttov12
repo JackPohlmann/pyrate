@@ -1,0 +1,4 @@
+#!/bin/bash
+mkdir $RTTOV_INSTALL_DIR
+wget --timeout=90 http://nwpsaf.eu/downloads/james/$RTTOV_MINOR_REL.tar.xz
+tar -xJf rttov123.tar.xz --directory $RTTOV_INSTALL_DIR

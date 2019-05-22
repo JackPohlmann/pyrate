@@ -26,7 +26,13 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
 elif [[ "$OSTYPE" == "cygwin" ]]; then
 	wget -P $IASI_INSTALL_DIR $RTCOEF_IASI_SRC
 elif [[ "$OSTYPE" == "msys" ]]; then
-	(cd $IASI_INSTALL_DIR && curl -O -C - $RTCOEF_IASI_SRC)
+	(cd $IASI_INSTALL_DIR && curl -O $RTCOEF_IASI_SRC)
+	ec=$?
+	while [[ $ec == 18 ]]; do
+		echo "Resuming download..."
+		(cd $IASI_INSTALL_DIR && curl -O -C - $RTCOEF_IASI_SRC)
+		ec=$?
+	done
 fi
 
 echo "Finished."

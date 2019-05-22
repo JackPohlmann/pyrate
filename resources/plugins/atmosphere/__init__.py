@@ -22,8 +22,9 @@ class Atmosphere(BaseAtmosphere):
 
 def load(plugname, **kwargs):
     """Load a plugin."""
+    modpath = 'resources.plugins.atmosphere.'
     global plugMod
-    plugMod = il.import_module(plugname)
+    plugMod = il.import_module(''.join([modpath, plugname]))
     global Plugin
     Plugin = plugMod.Plugin()
     Plugin.start(**kwargs)

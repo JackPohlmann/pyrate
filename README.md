@@ -31,5 +31,5 @@ Note that the RTTOV Docker image is large and may take time to download.
 
 - Due to the dependence of this application on some shell scripts, functionality on Windows machines may be limited.
 - Docker requires root (admin) privileges. If Docker errors are occuring, try the two options:
-  (1) Prepend the `sudo` command to the parent program or shell.
-  (2) Add the user to the `docker` group using `sudo usermod -a -G docker <user>`.
+  1. Prepend the `sudo` command to the parent program or shell.
+  2. Add the user to the `docker` group using `sudo usermod -a -G docker <user>`.

@@ -2,22 +2,22 @@ import abc
 import importlib as il
 
 
-def runPlugin(plugin, params):
+def run(plugin, params):
     """General function for running a plugin."""
-    plugin.load(params['load']['args'],params['load']['kwargs'])
-    plugin.run(params['run']['args'],params['run']['kwargs'])
-    return plugin.get(params['get']['args'],params['get']['kwargs'])
+    plugin.load(list(params['load']['args'].values()),params['load']['kwargs'])
+    plugin.run(list(params['run']['args'].values()),params['run']['kwargs'])
+    return plugin.get(list(params['get']['args'].values()),params['get']['kwargs'])
 
 
 # Parameter template
 """Add to each plugin."""
-_params = { 
-        'start': {'args':[],'kwargs':{}},
-        'stop': {'args':[],'kwargs':{}},
-        'load': {'args':[],'kwargs':{}},
-        'run': {'args':[],'kwargs':{}},
-        'get': {'args':[],'kwargs':{}},
-    }
+_params = dict(
+            start=dict(args=dict(),kwargs=dict()),
+            stop=dict(args=dict(),kwargs=dict()),
+            load=dict(args=dict(),kwargs=dict()),
+            run=dict(args=dict(),kwargs=dict()),
+            get=dict(args=dict(),kwargs=dict()),
+    )
 
 # Return parameters
 def params(*args):

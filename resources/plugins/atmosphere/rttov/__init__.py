@@ -19,16 +19,17 @@ MOUNT_DIR_CLIENT = '/usr/src/app'
 DATA_DIR = '{}/{}'.format(MOUNT_DIR_HOST, ri.DATA_DIR)
 
 # Parameters
-_params = { 
-        'start': {'args':[],'kwargs':{'inst':None}},
-        'stop': {'args':[],'kwargs':{}},
-        'load': {'args':['profile','resolution'],'kwargs':{}},
-        'run': {'args':[],'kwargs':{}},
-        'get': {'args':[],'kwargs':{'fname':None}},
-    }
+_params = dict(
+            start=dict(args=dict(),kwargs=dict(inst=None)),
+            stop=dict(args=dict(),kwargs=dict()),
+            load=dict(args=dict(prof='prof0',res=0),kwargs=dict()),
+            run=dict(args=dict(),kwargs=dict()),
+            get=dict(args=dict(),kwargs=dict(fname=None)),
+    )
+
 
 # Clean up
-def Clean():
+def clean():
     for f in os.listdir(DATA_DIR):
         if f.endswith('.h5'):
             os.remove(os.path.join(DATA_DIR,f))

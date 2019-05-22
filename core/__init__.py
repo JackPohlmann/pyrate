@@ -27,8 +27,8 @@ HDSTRUCT = {}  # Computational dict; stores all data and passes it thru
 
 
 # Keys
-plug_key = 'plugins'
-input_key = 'inputs'
+plug_key = 'Plugins'
+input_key = 'Inputs'
 
 
 # Initialize

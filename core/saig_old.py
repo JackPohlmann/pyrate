@@ -70,7 +70,50 @@ class interpolators:
         return val1 + (val2-val1) * step
 
 
-class InterpGrid():
+class DummySAIG(abc.ABC):
+    """Dummy Saig class for simple returns."""
+    @abc.abstractmethod
+    def get(self, arg1, arg2):
+        pass
+
+
+class AbstractInterpGrid(abc.ABC):
+    """Abstract 2D-grid interpolation class."""
+    def __init__(self, dataGrid, interpolator):
+        try:
+            if len(dataGrid.shape)<2 or 1 in dataGrid.shape[:2]:
+                raise ValueError("Must have 2D+ dataGrid.")
+        except TypeError:
+            raise TypeError("dataGrid must be array-like.")
+        if not callable(interpolator):
+            raise TypeError("interpolator must be a function.")
+            
+        self._dataGrid = dataGrid
+        self._interpolator = interpolator
+
+        self.dims = self._dataGrid.shape[:2]
+        try:
+            self.depth = self._dataGrid.shape[3]
+        except IndexError:
+            self.depth = 1
+        return
+
+    @abc.abstractmethod
+    def get(self, index1, index2):
+        """
+        Returns value at specified location [index1,index2]. If both index1 and
+        index2 are integers, then dataGrid[index1,index2] is returned.
+        Otherwise the value is interpolated using the specified interpolator.
+        """
+        if type(index1) not in (int,float) or type(index2) not in (int,float):
+            raise TypeError("Indices must be int or float.")
+        elif type(index1)==type(index2)==int:
+            return self._dataGrid[index1, index2]
+        else:
+            return self._interpolator(index1, index2, self._dataGrid)
+
+
+class InterpGrid(AbstractInterpGrid):
     """
     Interpolate over a regular 2D grid.
 
@@ -90,36 +133,11 @@ class InterpGrid():
     """
     def __init__(self, dataGrid, interpMode='bilinear'):
         interpolator = interpolators.fromKey(interpMode)
-        try:
-            if len(dataGrid.shape)<2 or 1 in dataGrid.shape[:2]:
-                raise ValueError("Must have 2D+ dataGrid.")
-        except TypeError:
-            raise TypeError("dataGrid must be array-like.")
-        if not callable(interpolator):
-            raise TypeError("interpolator must be a function.")
-            
-        self._dataGrid = dataGrid
-        self._interpolator = interpolator
-
-        self.dims = self._dataGrid.shape[:2]
-        try:
-            self.depth = self._dataGrid.shape[3]
-        except IndexError:
-            self.depth = 1
+        super().__init__(dataGrid, interpolator)
         return
-
     def get(self, index1, index2):
-        """
-        Returns value at specified location [index1,index2]. If both index1 and
-        index2 are integers, then dataGrid[index1,index2] is returned.
-        Otherwise the value is interpolated using the specified interpolator.
-        """
-        if type(index1) not in (int,float) or type(index2) not in (int,float):
-            raise TypeError("Indices must be int or float.")
-        elif type(index1)==type(index2)==int:
-            return self._dataGrid[index1, index2]
-        else:
-            return self._interpolator(index1, index2, self._dataGrid)
+        """Return a value interpolated onto dataGrid at [index1, index2]."""
+        return super().get(index1, index2)
 
 
 class SAIG(InterpGrid):

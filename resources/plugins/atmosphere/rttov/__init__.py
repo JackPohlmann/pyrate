@@ -3,6 +3,7 @@ import docker
 import h5py
 import numpy as np
 import atexit
+import warnings
 
 import pyrate.resources.plugins.atmosphere as atm
 from pyrate.resources import DOCK_CLIENT 
@@ -20,11 +21,11 @@ DATA_DIR = '{}/{}'.format(MOUNT_DIR_HOST, ri.DATA_DIR)
 
 # Parameters
 _params = dict(
-            start=dict(args=dict(),kwargs=dict(inst=None)),
-            stop=dict(args=dict(),kwargs=dict()),
-            load=dict(args=dict(prof='prof0',res=0),kwargs=dict()),
-            run=dict(args=dict(),kwargs=dict()),
-            get=dict(args=dict(),kwargs=dict(fname=None)),
+            start=dict(inst=None),
+            stop=dict(),
+            load=dict(profile='prof0',resolution=1,sun_angles=(45,180)),
+            run=dict(),
+            get=dict(fname='data'),
     )
 
 
@@ -60,32 +61,47 @@ class Plugin(atm.BaseAtmPlugin):
         _ = self.container.exec_run(cmd) 
         return
 
-    def start(self, *args, **kwargs):
+    def start(self, inst=None):
         """Initialize the system."""
         # Load session settings next
-        cmd = 'init' if ('inst' not in list(kwargs.keys())) \
-                else 'init {}'.format(kwargs['inst'])
+        cmd = 'init' if not inst else 'init {}'.format(inst)
         self._send_cmd(cmd)
         return
 
-    def stop(self, *args, **kwargs):
+    def stop(self, **kwargs):
         """Manually stop the system. Will remove the Docker Container as well."""
         self._send_cmd('exit')
         return
 
-    def load(self, *args, **kwargs):
+    def load(self, profile='prof0', resolution=1, sun_angles=(45,180)):
         """Load profile data.
         This can be done by moving the necessary data to a shared directory
         (mounted with the 'bind' option) and sending a command to load it.
+
+        resolution: number of rays per 90 degrees
+        NOTE: res=10 uses approx 48Gb of memory. res=5 uses approx 12Gb.
+          This is all done using IASI (8461 channels) on the highest fidelity
+          setting (4), so the memory usage can be expected to be towards the
+          higher end. Still, need to keep an eye on this.
         """
-        profile, resolution = args
-        # print('{} {}'.format(profile, resolution))
-        # self._send_cmd('load {}'.format(profile, resolution))
-        cmd = 'load {} {}'.format(profile, resolution)
+        # if resolution>5:
+        #     rws = 'Resolutions greater than 5 result in significant memory usage.'
+        #     warnings.warn(rws)
+        #     print('A resolution of 5 may use up to 12 Gb of memory.')
+        #     while pyrate.WARNINGS:
+        #         ans = input("Continue? [y/n] ")
+        #         if ans=='y':
+        #             break
+        #         elif ans=='n':
+        #             raise RuntimeError("Rejected load.")
+        #         else:
+        #             print("Unkown input.")
+        sun_zen, sun_az = sun_angles
+        cmd = 'load {} {} {} {}'.format(profile, resolution, sun_zen, sun_az)
         self._send_cmd(cmd)
         return
 
-    def run(self, *args, **kwargs):
+    def run(self, **kwargs):
         """Run the plugin.
         Runs whatever is set up. Make sure to place output data in the shared
         directory.
@@ -93,12 +109,10 @@ class Plugin(atm.BaseAtmPlugin):
         self._send_cmd('run')
         return
 
-    def get(self, *args, **kwargs):
+    def get(self, fname='data'):
         """Grab the data saved in the shared directory.
         Convert it to the necessary format specified by BaseAtmosphere.
         """
-        fname = 'data' if ('fname' not in list(kwargs.keys())) \
-                else kwargs['fname']
         # Grab data from the specified output file
         self._send_cmd('save {}'.format(fname))
         atm_kwargs = {}

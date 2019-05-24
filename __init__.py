@@ -8,19 +8,24 @@ Need to keep track of:
 
 import os
 
-import pyrate.core
-import pyrate.resources
+import pyrate.core as _core
+import pyrate.resources as _resources
+
 
 # ---------- Shorthands ---------- #
 # Functions
 def plug_params(module, plugin):
-    return pyrate.resources.plugins.params(*[module, plugin])
+    return _resources.plugins.params(*[module, plugin])
+load_plug = _resources.plugins.load
 # Keys
-plug_key = pyrate.core.plug_key
-input_key = pyrate.core.input_key
-atm_key = 'atmosphere'
-bg_key = 'background'
-targ_key = 'target'
+plug_key = _core.plug_key
+input_key = _core.input_key
+atm_key = _core.atm_key
+bg_key = _core.bg_key
+targ_key = _core.targ_key
+
+
+# ---------- Basic recipes ---------- #  
 # Recipe template
 template = {
         plug_key: {
@@ -29,15 +34,25 @@ template = {
                 targ_key: '',
             },
         input_key: {
-                atm_key: pyrate.resources.plugins._params,
+                atm_key: _resources.plugins._params,
             },
     }
-
+# Default recipe
 default = {
         plug_key: {
                 atm_key: 'rttov',
                 bg_key: 'lambertian',
                 targ_key: '2d',
+            },
+        input_key: {
+                atm_key: plug_params(atm_key, 'rttov'),
+                bg_key: plug_params(bg_key, 'lambertian'),
+                targ_key: plug_params(targ_key, '2d'),
+            },
+    }
+simple = {
+        plug_key: {
+                atm_key: 'rttov',
             },
         input_key: {
                 atm_key: plug_params(atm_key, 'rttov'),
@@ -73,19 +88,52 @@ class Recipe(namedDict):
         base = args[0] if args else default
         super().__init__(**base)
         # Plugins
+        self._formerPlugs = self[plug_key].copy()
         self[plug_key] = namedDict(**self[plug_key])
         # Inputs
         self[input_key] = namedDict(**self[input_key])
         for key in self[input_key].keys():
             self[input_key][key] = namedDict(**self[input_key][key])
+        # Pre-initialize
+        self.coreInst = {}
+        self.Data = None
         return
+
+    def __del__(self):
+        """Makes sure to stop the associated plugins."""
+        for mod in self.coreInst.keys():
+            self.coreInst[mod]['plugObj'].stop()
+    
     def loadDefaultInputs(self):
         """Load the default plugin inputs."""
-        for key in self[plug_key].keys():
-            defs = plug_params(key, self[plug_key][key])
-            for cmd in self[input_key][key].keys():
-                self[input_key][key][cmd] = defs[cmd]
+        for mod in self[plug_key].keys():
+            defs = plug_params(mod, self[plug_key][mod])
+            for cmd in self[input_key][mod].keys():
+                self[input_key][mod][cmd] = defs[cmd]
         return
+    
+    def _gen_core_instructions(self):
+        """Converts the Plugin/Input setup into instructions used by the core
+        module."""
+        for mod in self[plug_key].keys():
+            # Check for a newly loaded plugin
+            if (self.coreInst and self[plug_key][mod]!=self._formerPlugs[mod]):
+                self.coreInst['plugObj'].stop()
+                self._formerPlugs[mod] = self[plug_key][mod]
+            self.coreInst[mod] = {}
+            inputs = self[input_key][mod]
+            plugObj = load_plug(mod, self[plug_key][mod], **inputs['start'])
+            plugFunc = lambda inps: _resources.plugins.run(plugObj, inps)
+            self.coreInst[mod]['plugObj'] = plugObj
+            self.coreInst[mod][plug_key] = plugFunc
+            self.coreInst[mod][input_key] = inputs
+
     def run(self):
         """Runs the PyRATE simulation."""
-        pass
+        if not self.coreInst: self._gen_core_instructions()
+        _core.init(self.coreInst)
+        _core.run()
+        self.Data = _core.HDSTRUCT.copy()
+        _ = self.Data.pop('last')
+        self.Data = namedDict(**self.Data)
+        return

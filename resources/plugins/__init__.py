@@ -2,27 +2,26 @@ import abc
 import importlib as il
 
 # Load a plugin
-def load(module, plugin):
+def load(module, plugin, **kwargs):
     tmp = il.import_module('.'.join([__name__, module]))
-    tmp.load(plugin)
-    return
+    return tmp.load(plugin, **kwargs)
 
 # Run a plugin
 def run(plugin, params):
     """General function for running a plugin."""
-    plugin.load(list(params['load']['args'].values()),params['load']['kwargs'])
-    plugin.run(list(params['run']['args'].values()),params['run']['kwargs'])
-    return plugin.get(list(params['get']['args'].values()),params['get']['kwargs'])
+    plugin.load(**params['load'])
+    plugin.run(**params['run'])
+    return plugin.get(**params['get'])
 
 
 # Parameter template
 """Add to each plugin."""
 _params = dict(
-            start=dict(args=dict(),kwargs=dict()),
-            stop=dict(args=dict(),kwargs=dict()),
-            load=dict(args=dict(),kwargs=dict()),
-            run=dict(args=dict(),kwargs=dict()),
-            get=dict(args=dict(),kwargs=dict()),
+            start=dict(),
+            stop=dict(),
+            load=dict(),
+            run=dict(),
+            get=dict(),
     )
 
 # Return parameters
@@ -42,26 +41,26 @@ class BasePlugin(abc.ABC):
     """Base class for RASPy plugin."""
 
     @abc.abstractmethod
-    def start(self, *args, **kwargs):
+    def start(self, **kwargs):
         """Start the plugin."""
         pass
 
     @abc.abstractmethod
-    def stop(self, *args, **kwargs):
+    def stop(self, **kwargs):
         """Stop the plugin."""
         pass
 
     @abc.abstractmethod
-    def load(self, *args, **kwargs):
+    def load(self, **kwargs):
         """Load inputs."""
         pass
 
     @abc.abstractmethod
-    def run(self, *args, **kwargs):
+    def run(self, **kwargs):
         """Run the plugin."""
         pass
 
     @abc.abstractmethod
-    def get(self, *args, **kwargs):
+    def get(self, **kwargs):
         """Return the output."""
         pass

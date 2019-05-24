@@ -6,22 +6,18 @@ Houses the main run function.
 """
 
 import sys
+import traceback
 
 import pyrate.core.incoming
 import pyrate.core.atmosphere
 import pyrate.core.background
 import pyrate.core.outgoing
 import pyrate.core.target
+import pyrate.core.saig
 #import pyrate.core.tests
 
 
-# These variables should be wrapped up in params and comp_dict
-# SIMULATOR = None
-# ATMDATA = None
-
-# BG_TARGET = None
-# SP_TARGET = None
-
+# 'Header' variables for running the core modules
 INSTRUCT = None
 HDSTRUCT = {}  # Computational dict; stores all data and passes it thru
 
@@ -29,6 +25,9 @@ HDSTRUCT = {}  # Computational dict; stores all data and passes it thru
 # Keys
 plug_key = 'Plugins'
 input_key = 'Inputs'
+atm_key = 'atmosphere'
+bg_key = 'background'
+targ_key = 'target'
 
 
 # Initialize
@@ -37,14 +36,14 @@ def init(instruct):
     global INSTRUCT
     global HDSTRUCT
     INSTRUCT = instruct
-    HDSTRUCT['last'] = [__name__]
-
+    HDSTRUCT = dict(last=[__name__])
     return
 
 
 # Main function
 def run():
     """Run the simulation."""
+    global INSTRUCT
     if not INSTRUCT:
         raise NotImplementedError("Need to initialize instructions first.")
 
@@ -55,12 +54,16 @@ def run():
         pyrate.core.outgoing.run()
         HDSTRUCT['last'].append(__name__)
     except:
-        e = sys.exc_info()[0]
+        e, d, tb = sys.exc_info()
         last = HDSTRUCT['last'][-1]
         print()
         print("An exception occured in module: {}".format(last))
         print()
         print(e)
+        print()
+        print(d)
+        print()
+        traceback.print_tb(tb)
         print()
         print("Check HDSTRUCT['last'] for a trace of modules.")
     finally:

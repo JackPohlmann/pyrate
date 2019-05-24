@@ -4,6 +4,8 @@ import pyrate.resources.plugins as plugins
 from pyrate.core.atmosphere import BaseAtmosphere
 
 
+Plugins = []
+
 class BaseAtmPlugin(plugins.BasePlugin):
     """Base class for atmosphere plugin.
     Good place for storing shared variables.
@@ -22,12 +24,12 @@ class Atmosphere(BaseAtmosphere):
 
 def load(plugname, **kwargs):
     """Load a plugin."""
-    global plugMod
     plugMod = il.import_module('.'.join([__name__, plugname]))
-    global Plugin
+    global Plugins
+    Plugins.append(plugMod)
     Plugin = plugMod.Plugin()
     Plugin.start(**kwargs)
-    return
+    return Plugin
 
 def params(plugin):
     """Use the plugins.params function to return plugin parameters."""

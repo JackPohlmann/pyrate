@@ -1,5 +1,6 @@
 import abc
 import os
+from math import sqrt
 
 import pyrate.core
 
@@ -9,7 +10,6 @@ down_key = 'downwell'
 up_key = 'upwell'
 tau_key = 'tau'
 wav_key = 'wavenums'
-
 
 # Base class
 class BaseAtmosphere(abc.ABC):
@@ -39,8 +39,9 @@ class BaseAtmosphere(abc.ABC):
 
 # This one
 def run():
+    pyrate.core.HDSTRUCT['last'].append(__name__)
     # Load data/plugin
-    atm_dict = pyrate.core.INSTRUCT[__name__]
+    atm_dict = pyrate.core.INSTRUCT[pyrate.core.atm_key]
     plugin = atm_dict[pyrate.core.plug_key]     # This should be a function
     inputs = atm_dict[pyrate.core.input_key]
 
@@ -48,9 +49,16 @@ def run():
     atmosphere = plugin(inputs)
     assert isinstance(atmosphere, BaseAtmosphere), "Plugin must return a BaseAtmosphere object."
 
+    # Reshape outputs if necessary
+    for key in [down_key, up_key, tau_key]:
+        data = getattr(atmosphere, key)
+        if len(data.shape)==2:
+            res, datadim = data.shape
+            res = int(sqrt(res) / 2)
+            setattr(atmosphere, key, data.reshape((res, 4*res, datadim)))
+
     # Set outputs
-    pyrate.core.HDSTRUCT[down_key] = getattr(atmosphere, down_key)
-    pyrate.core.HDSTRUCT[up_key] = getattr(atmosphere, up_key)
-    pyrate.core.HDSTRUCT[tau_key] = getattr(atmosphere, tau_key)
+    for key in BaseAtmosphere.required_attributes:
+        pyrate.core.HDSTRUCT[key] = getattr(atmosphere, key)
     
     return

@@ -35,21 +35,24 @@ class BaseTarget(abc.ABC):
 
 # Run the simulation
 def run():
+    pyrate.core.HDSTRUCT['last'].append(__name__)
     # Set up plugin
-    targ_dict = pyrate.core.INSTRUCT[__name__]
+    targ_dict = pyrate.core.INSTRUCT[targ_key]
     plugin = targ_dict[pyrate.core.plug_key]
     inputs = targ_dict[pyrate.core.input_key]
 
     # Append previously computed values
-    inputs[pyrate.core.down_key] = pyrate.core.HDSTRUCT[pyrate.core.down_key]
-    inputs[pyrate.core.background.bg_key] = pyrate.core.HDSTRUCT[pyrate.core.background.bg_key]
+    inputs['load'][pyrate.core.down_key] = \
+            pyrate.core.HDSTRUCT[pyrate.core.down_key]
+    inputs['load'][pyrate.core.background.bg_key] = \
+            pyrate.core.HDSTRUCT[pyrate.core.background.bg_key]
 
     # Run and check
     target = plugin(inputs)
     assert isinstance(target, BaseTarget), "Plugin must return a BaseTarget object."
 
     # Set output
-    pyrate.core.HDSTRUCT[targ_key] = target.__dict__[targ_key]
-    pyrate.core.HDSTRUCT[proj_key] = target.__dict__[proj_key]
+    for key in BaseTarget.required_attributes:
+        pyrate.core.HDSTRUCT[key] = getattr(target, key)
 
     return

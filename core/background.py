@@ -32,19 +32,14 @@ class BaseBackground(abc.ABC):
 
 # Run the simulation
 def run():
-    """Do stuff.
-    
-    1) Load
-    2) Simulate
-    3) Return
-    
-    """
+    pyrate.core.HDSTRUCT['last'].append(__name__)
 
     # Load data/plugin
-    bg_dict = pyrate.core.INSTRUCT[__name__]
+    bg_dict = pyrate.core.INSTRUCT[bg_key]
     plugin = bg_dict[pyrate.core.plug_key]
     inputs = bg_dict[pyrate.core.input_key]
-    inputs[pyrate.core.atmosphere.down_key] = pyrate.core.HDSTRUCT[pyrate.core.atmosphere.down_key]
+    downwell = pyrate.core.HDSTRUCT[pyrate.core.atmosphere.down_key]
+    inputs['load'] = downwell
 
     # Run and check
     """Need to use the plugins here."""

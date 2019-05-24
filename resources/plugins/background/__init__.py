@@ -2,6 +2,7 @@ import importlib as il
 
 import pyrate.resources.plugins as plugins
 from pyrate.core.background import BaseBackground 
+from pyrate.core.atmosphere import down_key
 
 
 class BaseBgPlugin(plugins.BasePlugin):

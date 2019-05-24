@@ -11,6 +11,9 @@ import pyrate.core
 
 
 def run():
+    # Sign
+    pyrate.core.HDSTRUCT['last'].append(__name__)
+
     # Run the sub-modules
     pyrate.core.atmosphere.run()
     pyrate.core.background.run()

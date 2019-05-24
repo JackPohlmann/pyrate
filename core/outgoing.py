@@ -12,6 +12,9 @@ import pyrate.core
 
 # Generate the outgoing data
 def run():
+    # Sign
+    pyrate.core.HDSTRUCT['last'].append(__name__)
+
     # Run the sub-modules
     pyrate.core.target.run()
 

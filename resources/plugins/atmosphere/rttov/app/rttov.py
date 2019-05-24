@@ -57,16 +57,16 @@ class rttovEnvironment(Cmd):
     def do_load(self, inp):
         """Load an atmospheric profile. Requires inputs for data and resolution."""
         # Convert resolution into a number of profiles
-        data, resolution = inp.split()
+        data, resolution, sun_zen, sun_az = inp.split()
+        resolution = int(resolution)
+        sun_zen = int(sun_zen)
+        sun_az = int(sun_az)
         # Load the data
         data = h5py.File("{}/{}.h5".format(PROFILE_DIR, data), 'r')
         nlevels = len(np.array(data['P']))
         # Set up the profiles
-        nprofs = 1 # This is hardcoded right now until resolution is setup
+        nprofs = 4*resolution*resolution
         self.Profiles = pyrttov.Profiles(nprofs, nlevels)
-        # Set up the profiles
-        """Determine the angles based on the resolution"""
-        resolution = int(resolution)
         # Set the profile data
         probs = ['GasUnits', 'Skin']
         for key in [key for key in list(data.keys()) if key not in probs]:
@@ -75,7 +75,15 @@ class rttovEnvironment(Cmd):
         setattr(self.Profiles, 'GasUnits', int(np.squeeze(data['GasUnits'])))
         setattr(self.Profiles, 'Skin', np.tile(list(data['Skin']) + [0],(nprofs,1)))
         # Set angles
-        setattr(self.Profiles, 'Angles', np.tile(np.array([0,0,45,180]),(nprofs,1)))
+        ang_arr = np.empty((resolution, 4*resolution, 4))
+        # RTTOV can only handle up to 85 degrees for v9 predicators, otherwise 75
+        # zen_leg = 85/resolution if '9pred' in self.Rttov.FileCoef else 75/resolution
+        zen_leg = 90/resolution
+        az_leg = 90/resolution
+        for zen in range(resolution):
+            for az in range(4*resolution):
+                ang_arr[zen, az] = [zen_leg*zen, az_leg*az, sun_zen, sun_az]
+        setattr(self.Profiles, 'Angles', ang_arr.reshape((nprofs,4)))
         # print(self.Profiles.Angles)
         # Load the profiles
         self.Rttov.Profiles = self.Profiles

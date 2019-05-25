@@ -149,3 +149,19 @@ class Recipe(namedDict):
         _ = self.Data.pop('last')
         self.Data = namedDict(**self.Data)
         return
+
+    def tree(self):
+        for key0 in [plug_key,input_key]:
+            print()
+            print(key0)
+            for key1 in self[key0].keys():
+                print('|')
+                print('+-- ' + key1, end='')
+                if type(self[key0][key1])==namedDict:
+                    print()
+                    for key2 in self[key0][key1].keys():
+                        print('|   |')
+                        print('|   +-- ' + key2 + ' = ' + str(self[key0][key1][key2]))
+                else:
+                   print(' = ' + self[key0][key1]) 
+

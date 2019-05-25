@@ -1,12 +1,12 @@
 import abc
 
 import pyrate.core
+import pyrate.core.keys as pk
 
-__name__ = 'target'
 
 # Keys
-targ_key = 'target'
-proj_key = 'projected'  # Projected area ratio (SAIG)
+targ_key = pk.targ_key
+proj_key = pk.proj_key
 
 
 # Base target class
@@ -35,20 +35,15 @@ class BaseTarget(abc.ABC):
 
 # Run the simulation
 def run():
+    print('Generating target...')
     pyrate.core.HDSTRUCT['last'].append(__name__)
     # Set up plugin
     targ_dict = pyrate.core.INSTRUCT[targ_key]
-    plugin = targ_dict[pyrate.core.plug_key]
-    inputs = targ_dict[pyrate.core.input_key]
-
-    # Append previously computed values
-    inputs['load'][pyrate.core.down_key] = \
-            pyrate.core.HDSTRUCT[pyrate.core.down_key]
-    inputs['load'][pyrate.core.background.bg_key] = \
-            pyrate.core.HDSTRUCT[pyrate.core.background.bg_key]
+    plugin = targ_dict[pk.plug_key]
+    inputs = targ_dict[pk.input_key]
 
     # Run and check
-    target = plugin(inputs)
+    target = pyrate.core.plugins.run(plugin, inputs)
     assert isinstance(target, BaseTarget), "Plugin must return a BaseTarget object."
 
     # Set output

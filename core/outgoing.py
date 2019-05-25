@@ -17,12 +17,7 @@ def run():
 
     # Run the sub-modules
     pyrate.core.target.run()
-
-    # Compile the output
-    """Do stuff here. Probably a separate function.
-    
-    pixel.run()?
-    """
+    pyrate.core.pixel.run()
 
     # Sign and return
     pyrate.core.HDSTRUCT['last'].append(__name__)

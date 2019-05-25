@@ -13,22 +13,14 @@ import pyrate.core.atmosphere
 import pyrate.core.background
 import pyrate.core.outgoing
 import pyrate.core.target
+import pyrate.core.pixel
 import pyrate.core.saig
-#import pyrate.core.tests
 
 import pyrate.resources.plugins as plugins
 
 # 'Header' variables for running the core modules
 INSTRUCT = None
 HDSTRUCT = {}  # Computational dict; stores all data and passes it thru
-
-
-# Keys
-plug_key = 'Plugins'
-input_key = 'Inputs'
-atm_key = 'atmosphere'
-bg_key = 'background'
-targ_key = 'target'
 
 
 # Initialize

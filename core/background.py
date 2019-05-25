@@ -1,10 +1,11 @@
 import abc
 
 import pyrate.core
+import pyrate.core.keys as pk
 
 
 # Keys
-bg_key = 'background'
+bg_key = pk.bg_key
 
 
 # Base class
@@ -37,8 +38,8 @@ def run():
 
     # Load data/plugin
     bg_dict = pyrate.core.INSTRUCT[bg_key]
-    plugin = bg_dict[pyrate.core.plug_key]
-    inputs = bg_dict[pyrate.core.input_key]
+    plugin = bg_dict[pk.plug_key]
+    inputs = bg_dict[pk.input_key]
     # The lines below are bad. The data already exists
     # downwell = pyrate.core.HDSTRUCT[pyrate.core.atmosphere.down_key]
     # inputs['load'] = downwell

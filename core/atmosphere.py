@@ -1,13 +1,14 @@
 import abc
 
 import pyrate.core
-
+import pyrate.core.keys as pk
 
 # Keys
-down_key = 'downwell'
-up_key = 'upwell'
-tau_key = 'tau'
-wav_key = 'wavenums'
+down_key = pk.down_key
+up_key = pk.up_key
+tau_key = pk.tau_key 
+wav_key = pk.wav_key
+
 saig_keys = [down_key, up_key, tau_key]
 
 # Base class
@@ -38,12 +39,12 @@ class BaseAtmosphere(abc.ABC):
 
 # This one
 def run():
-    print('Generating {}...'.format(pyrate.core.atm_key))
+    print('Generating {}...'.format(pk.atm_key))
     pyrate.core.HDSTRUCT['last'].append(__name__)
     # Load data/plugin
-    atm_dict = pyrate.core.INSTRUCT[pyrate.core.atm_key]
-    plugin = atm_dict[pyrate.core.plug_key]     # This should be a plugin
-    inputs = atm_dict[pyrate.core.input_key]
+    atm_dict = pyrate.core.INSTRUCT[pk.atm_key]
+    plugin = atm_dict[pk.plug_key]     # This should be a plugin
+    inputs = atm_dict[pk.input_key]
 
     # Run and check
     atmosphere = pyrate.core.plugins.run(plugin, inputs)

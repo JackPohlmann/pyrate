@@ -1,7 +1,19 @@
 import importlib as il
 
+import pyrate.core
 import pyrate.resources.plugins as plugins
 from pyrate.core.target import BaseTarget 
+from pyrate.core.keys import bg_key, targ_key, wav_key
+
+
+# Plugins list
+Plugins = []
+
+def get_background():
+    return pyrate.core.HDSTRUCT[bg_key]
+
+def get_wavenums():
+    return pyrate.core.HDSTRUCT[wav_key]
 
 
 class BaseTargPlugin(plugins.BasePlugin):
@@ -22,12 +34,12 @@ class Target(BaseTarget):
 
 def load(plugname, **kwargs):
     """Load a plugin."""
-    global plugMod
     plugMod = il.import_module('.'.join([__name__, plugname]))
-    global Plugin
+    global Plugins
+    Plugins.append(plugMod)
     Plugin = plugMod.Plugin()
     Plugin.start(**kwargs)
-    return
+    return Plugin
 
 def params(plugin):
     """Use the plugins.params function to return plugin parameters."""

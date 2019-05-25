@@ -2,8 +2,8 @@ import importlib as il
 
 import pyrate.core
 import pyrate.resources.plugins as plugins
-from pyrate.core.background import BaseBackground 
-from pyrate.core.atmosphere import down_key, wav_key
+from pyrate.core.background import BaseBackground
+from pyrate.core.keys import bg_key, down_key, wav_key
 
 
 # Plugins list
@@ -14,6 +14,7 @@ def get_downwell():
 
 def get_wavenums():
     return pyrate.core.HDSTRUCT[wav_key]
+
 
 class BaseBgPlugin(plugins.BasePlugin):
     """Base class for atmosphere plugin.

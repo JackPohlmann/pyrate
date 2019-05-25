@@ -107,6 +107,8 @@ class InterpGrid():
             self.depth = self._dataGrid.shape[3]
         except IndexError:
             self.depth = 1
+        # memoize
+        self._memoized = {}
         return
 
     def get(self, index1, index2):
@@ -115,12 +117,16 @@ class InterpGrid():
         index2 are integers, then dataGrid[index1,index2] is returned.
         Otherwise the value is interpolated using the specified interpolator.
         """
-        if type(index1) not in (int,float) or type(index2) not in (int,float):
-            raise TypeError("Indices must be int or float.")
-        elif type(index1)==type(index2)==int:
-            return self._dataGrid[index1, index2]
-        else:
-            return self._interpolator(index1, index2, self._dataGrid)
+        key = '_'.join([str(index1),str(index2)])
+        try:
+            out = self._memoized[key]
+        except KeyError:
+            if type(index1)==type(index2)==int:
+                out = self._dataGrid[index1, index2]
+            else:
+                out = self._interpolator(index1, index2, self._dataGrid)
+            self._memoized[key] = out
+        return out
 
 
 class SAIG(InterpGrid):
@@ -205,8 +211,15 @@ class SAIG(InterpGrid):
 
 class dummySAIG(SAIG):
     """Dummy SAIG class when the output is constant."""
-    def __init__(self, output_val):
-        self._value = output_val
+    def __init__(self, function):
+        self._function = function
+        self._memoized = {}
         return
     def get(self, zen_angle, az_angle):
-        return self._value
+        key = '_'.join([str(zen_angle),str(az_angle)])
+        try:
+            out = self._memoized[key]
+        except KeyError:
+            out = self._function(zen_angle, az_angle)
+            self._memoized[key] = out
+        return out

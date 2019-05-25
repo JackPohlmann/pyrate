@@ -1,47 +1,27 @@
-'''
-Pixel
-
-CURRENTLY UNUSED
-
-Module for constructing the pixel. Composed of a background and a target.
-
-NEED TO SCALE SAIGs BY SURFACE AREA (cos2 factor)
-
-'''
-
-import numpy as np
-import warnings
-
-try:
-    import pyrate.core.saig as saig
-except ImportError as e:
-    print(e)
-    raise ImportError("Meant to be imported as a part of pyrate.core.")
+import pyrate.core
+import pyrate.core.keys as pk
 
 
-class SPAnchor():
-    """
-    Sub-Pixel Anchor class
-
-    Wraps a SAIG class with geometric information. Does not inherit from SAIG
-    since the anchor points will be set up before computing their respective
-    SAIGs.
-    """
-
-    def __init__(self, coords):
-        self.coords = coords
-        self.downwell = None
-        self.upwell = None
-        self.tau = None
+# Keys
+pix_key = pk.pix_key
 
 
-def ConstructTarget(pixelObj, background, target, downwell):
-    """
-    Construct the target.
+def run():
+    print('Finalizing pixel...')
+    pyrate.core.HDSTRUCT['last'].append(__name__)
+    # Grab the data
+    bg = pyrate.core.HDSTRUCT[pk.bg_key]
+    targ = pyrate.core.HDSTRUCT[pk.targ_key]
+    proj = pyrate.core.HDSTRUCT[pk.proj_key]
+    upwell = pyrate.core.HDSTRUCT[pk.up_key]
+    tau = pyrate.core.HDSTRUCT[pk.tau_key]
 
-    Parameters
-    ----------
-    pixelObj : 
+    # Make the new SAIG
+    def pixelOutput(zen, az):
+        coverage = proj.get(zen,az)
+        emitted = targ.get(zen,az) * coverage + bg.get(zen,az) * (1-coverage)
+        return tau.get(zen,az) * emitted + upwell.get(zen,az)
+    pixelSAIG = pyrate.core.saig.dummySAIG(pixelOutput)
+    pyrate.core.HDSTRUCT[pix_key] = pixelSAIG
 
-    """
-    pass
+    return

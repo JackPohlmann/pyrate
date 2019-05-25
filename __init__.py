@@ -9,6 +9,7 @@ Need to keep track of:
 import os
 
 import pyrate.core as _core
+import pyrate.core.keys as _pk
 import pyrate.resources as _resources
 
 
@@ -18,11 +19,11 @@ def plug_params(module, plugin):
     return _resources.plugins.params(*[module, plugin])
 load_plug = _resources.plugins.load
 # Keys
-plug_key = _core.plug_key
-input_key = _core.input_key
-atm_key = _core.atm_key
-bg_key = _core.bg_key
-targ_key = _core.targ_key
+plug_key = _pk.plug_key
+input_key = _pk.input_key
+atm_key = _pk.atm_key
+bg_key = _pk.bg_key
+targ_key = _pk.targ_key
 
 # ---------- Global parameters ---------- #
 Verbose = True
@@ -38,6 +39,8 @@ template = {
             },
         input_key: {
                 atm_key: _resources.plugins._params,
+                bg_key: _resources.plugins._params,
+                targ_key: _resources.plugins._params,
             },
     }
 # Default recipe
@@ -51,16 +54,6 @@ default = {
                 atm_key: plug_params(atm_key, 'rttov'),
                 bg_key: plug_params(bg_key, 'lambertian'),
                 targ_key: plug_params(targ_key, '2d'),
-            },
-    }
-simple = {
-        plug_key: {
-                atm_key: 'rttov',
-                bg_key: 'lambertian',
-            },
-        input_key: {
-                atm_key: plug_params(atm_key, 'rttov'),
-                bg_key: plug_params(bg_key, 'lambertian'),
             },
     }
 
@@ -79,12 +72,18 @@ class namedDict():
     def keys(self):
         return list(self.__dict__.keys())
 
+    def asDict(self):
+        return self.__dict__.copy()
+
     def __getitem__(self, key):
         return self.__dict__[key]
 
     def __setitem__(self, key, value):
         self.__dict__[key] = value
         return
+
+    def __eq__(self, rhs):
+        return self.__dict__ == rhs.__dict__
 
             
 class Recipe(namedDict):
@@ -106,16 +105,9 @@ class Recipe(namedDict):
 
     def __del__(self):
         """Makes sure to stop the associated plugins."""
-        for mod in self.coreInst.keys():
-            self.coreInst[mod][plug_key].stop()
-    
-    def loadDefaultInputs(self):
-        """Load the default plugin inputs."""
-        for mod in self[plug_key].keys():
-            defs = plug_params(mod, self[plug_key][mod])
-            for cmd in self[input_key][mod].keys():
-                self[input_key][mod][cmd] = defs[cmd]
-        return
+        if self.coreInst:
+            for mod in self.coreInst.keys():
+                self.coreInst[mod][plug_key].stop()
     
     def _gen_core_instructions(self):
         """Converts the Plugin/Input setup into instructions used by the core
@@ -148,6 +140,7 @@ class Recipe(namedDict):
         self.Data = _core.HDSTRUCT.copy()
         _ = self.Data.pop('last')
         self.Data = namedDict(**self.Data)
+        print('Finished.')
         return
 
     def tree(self):

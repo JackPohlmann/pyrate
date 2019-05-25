@@ -32,18 +32,20 @@ class BaseBackground(abc.ABC):
 
 # Run the simulation
 def run():
+    print('Generating {}...'.format(bg_key))
     pyrate.core.HDSTRUCT['last'].append(__name__)
 
     # Load data/plugin
     bg_dict = pyrate.core.INSTRUCT[bg_key]
     plugin = bg_dict[pyrate.core.plug_key]
     inputs = bg_dict[pyrate.core.input_key]
-    downwell = pyrate.core.HDSTRUCT[pyrate.core.atmosphere.down_key]
-    inputs['load'] = downwell
+    # The lines below are bad. The data already exists
+    # downwell = pyrate.core.HDSTRUCT[pyrate.core.atmosphere.down_key]
+    # inputs['load'] = downwell
 
     # Run and check
     """Need to use the plugins here."""
-    background = plugin(inputs)
+    background = pyrate.core.plugins.run(plugin, inputs)
     assert isinstance(background, BaseBackground), "Plugin must return a BaseBackground object."
 
     # Set outputs

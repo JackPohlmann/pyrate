@@ -2,12 +2,14 @@ import os
 import docker
 import h5py
 import numpy as np
+import math
 import atexit
 import warnings
 
 import pyrate.resources.plugins.atmosphere as atm
 from pyrate.resources import DOCK_CLIENT 
 import pyrate.resources.plugins.atmosphere.rttov.app.interface as ri
+from pyrate.core.saig import SAIG
 
 
 # ---------- Module Vars ---------- #
@@ -23,7 +25,7 @@ DATA_DIR = '{}/{}'.format(MOUNT_DIR_HOST, ri.DATA_DIR)
 _params = dict(
             start=dict(inst=None),
             stop=dict(),
-            load=dict(profile='prof0',resolution=1,sun_angles=(45,180)),
+            load=dict(profile='prof0',resolution=2,sun_angles=(45,180)),
             run=dict(),
             get=dict(fname='data'),
     )
@@ -113,11 +115,29 @@ class Plugin(atm.BaseAtmPlugin):
         """Grab the data saved in the shared directory.
         Convert it to the necessary format specified by BaseAtmosphere.
         """
+        fpath = '{}/{}.h5'.format(DATA_DIR, fname)
+        # Clear out file if it's already there
+        if fname + '.h5' in os.listdir(DATA_DIR):
+            os.remove(fpath)
         # Grab data from the specified output file
         self._send_cmd('save {}'.format(fname))
         atm_kwargs = {}
-        with h5py.File('{}/{}.h5'.format(DATA_DIR, fname),'r') as tf:
-            for key in atm.Atmosphere.required_attributes:
-                atm_kwargs[key] = np.array(tf[key])
+        while True:
+            try:
+                with h5py.File(fpath,'r') as tf:
+                    for key in atm.Atmosphere.required_attributes:
+                        atm_kwargs[key] = np.array(tf[key])
+                break
+            except OSError:
+                # Wait until file is there
+                pass
+        # Calc resolution
+        reso = atm_kwargs[atm.saig_keys[0]].shape[0]
+        reso = int(math.sqrt(reso/4))
+        # Separate these two just in case
+        ddim = atm_kwargs[atm.saig_keys[0]].shape[-1]
+        for key in atm.saig_keys:
+            dgrid = atm_kwargs[key].reshape((reso, 4*reso, ddim))
+            atm_kwargs[key] = SAIG(dgrid, (0,90), (0,360))
         # Initialize the output
         return atm.Atmosphere(**atm_kwargs)

@@ -1,9 +1,11 @@
 import importlib as il
 
 import pyrate.resources.plugins as plugins
-from pyrate.core.atmosphere import BaseAtmosphere
+from pyrate.core.atmosphere import BaseAtmosphere, saig_keys
 
+# Use saig_keys to tell plugins which outputs need to be SAIGS
 
+# Keeps track of loaded atm plugins
 Plugins = []
 
 class BaseAtmPlugin(plugins.BasePlugin):

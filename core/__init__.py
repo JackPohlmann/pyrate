@@ -16,6 +16,7 @@ import pyrate.core.target
 import pyrate.core.saig
 #import pyrate.core.tests
 
+import pyrate.resources.plugins as plugins
 
 # 'Header' variables for running the core modules
 INSTRUCT = None

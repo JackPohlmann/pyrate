@@ -1,9 +1,19 @@
 import importlib as il
 
+import pyrate.core
 import pyrate.resources.plugins as plugins
 from pyrate.core.background import BaseBackground 
-from pyrate.core.atmosphere import down_key
+from pyrate.core.atmosphere import down_key, wav_key
 
+
+# Plugins list
+Plugins = []
+
+def get_downwell():
+    return pyrate.core.HDSTRUCT[down_key]
+
+def get_wavenums():
+    return pyrate.core.HDSTRUCT[wav_key]
 
 class BaseBgPlugin(plugins.BasePlugin):
     """Base class for atmosphere plugin.
@@ -23,12 +33,12 @@ class Background(BaseBackground):
 
 def load(plugname, **kwargs):
     """Load a plugin."""
-    global plugMod
     plugMod = il.import_module('.'.join([__name__, plugname]))
-    global Plugin
+    global Plugins
+    Plugins.append(plugMod)
     Plugin = plugMod.Plugin()
     Plugin.start(**kwargs)
-    return
+    return Plugin
 
 def params(plugin):
     """Use the plugins.params function to return plugin parameters."""

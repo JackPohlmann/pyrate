@@ -60,6 +60,7 @@ class interpolators:
             return interpolators.linear(max(step1,step2), val1, val2)
         else:
             dg = dataGrid[ix:ix+2, iy:iy+2]
+            dg = np.swapaxes(dg, 1, -1)
             x_arr = np.array([1-step1, step1])
             y_arr = np.array([1-step2, step2])
             return np.dot(x_arr, np.dot(dg, y_arr))
@@ -131,12 +132,12 @@ class SAIG(InterpGrid):
     dataGrid : array_like
         2D+ data array in which the first two dimensions are indices and all
         trailing dimensions correspond to data.
-    anglerange : list or tuple
-        Lower and upper bounds for viewing angles corresponding to the first
-        dimension of dataGrid.
-    zenanglerange : list or tuple
+    zen_angle_range : list or tuple
         Lower and upper bounds for zenith viewing angles corresponding to the
         second dimension of dataGrid.
+    az_angle_range : list or tuple
+        Lower and upper bounds for azimuth viewing angles corresponding to the
+        first dimension of dataGrid.
     radians : bool, optional
         Indicates if the angle ranges are in radians. If True, converts input 
         ranges to degrees.
@@ -151,150 +152,61 @@ class SAIG(InterpGrid):
     """
 
     def __init__(
-            self, dataGrid, angle_range, zen_angle_range,
+            self, dataGrid, zen_angle_range, az_angle_range,
             radians=False, interpMode='bilinear'):
         """Initialize solid angle interpolator object."""
         try:
-            if not len(angle_range)==len(zen_angle_range)==2:
+            if not len(az_angle_range)==len(zen_angle_range)==2:
                 raise ValueError("Incorrect range dimensions.")
         except TypeError:
             raise TypeError("Incorrect type for angle ranges. Must be list-like.")
         if radians:
-            angle_range = tuple(map(degrees, angle_range))
+            az_angle_range = tuple(map(degrees, az_angle_range))
             zen_angle_range = tuple(map(degrees, zen_angle_range))
             warnings.warn("Input angle ranges are in radians. \
                 Object methods expect arguments in degrees.")
 
         super().__init__(dataGrid, interpMode=interpMode)
         
-        self.angle_range = tuple(sorted(angle_range))
+        self.az_angle_range = tuple(sorted(az_angle_range))
         self.zen_angle_range = tuple(sorted(zen_angle_range))
         
         # Parameters to convert angles to indices
-        angle_anchor = self.angle_range[0]
-        angle_scale = \
-            (self.angle_range[1] - self.angle_range[0]) / (self.dims[0] - 1)
         zen_angle_anchor = self.zen_angle_range[0]
         zen_angle_scale = \
-            (self.zen_angle_range[1] - self.zen_angle_range[0]) / (self.dims[1] - 1)
+            (self.zen_angle_range[1] - self.zen_angle_range[0]) / (self.dims[0] - 1)
+        az_angle_anchor = self.az_angle_range[0]
+        az_angle_scale = \
+            (self.az_angle_range[1] - self.az_angle_range[0]) / (self.dims[1] - 1)
 
         self._anchor_scale = (
-                (angle_anchor, angle_scale),
-                (zen_angle_anchor, zen_angle_scale)
+                (zen_angle_anchor, zen_angle_scale),
+                (az_angle_anchor, az_angle_scale)
             )
         return
 
-    def _convert_angle_index(self, angle, zen_angle):
+    def _convert_angle_index(self, zen_angle, az_angle):
         """Convert angles to indices."""
-        aanch, ascale = self._anchor_scale[0]
-        zanch, zscale = self._anchor_scale[1]
-        index1 = (angle - aanch) / ascale
-        index2 = (zen_angle - zanch) / zscale
+        zanch, zscale = self._anchor_scale[0]
+        aanch, ascale = self._anchor_scale[1]
+        index1 = (zen_angle - zanch) / zscale
+        index2 = (az_angle - aanch) / ascale
         return index1, index2
 
-    def get(self, angle, zen_angle):
+    def get(self, zen_angle, az_angle):
         """Returns value at [index1,index2] inerpolated onto dataGrid.
 
         index1 and index2 correspond to the angle and zen_angle, respectively,
         and must be in degrees.
         """
-        index1, index2 = self._convert_angle_index(angle, zen_angle)
+        index1, index2 = self._convert_angle_index(zen_angle, az_angle)
         return super().get(index1, index2)
 
-    @classmethod
-    def combine(cls, saiglist, angle_range=None, zen_angle_range=None):
-        """
-        Combine an arbitrary list of SAIGs into a single SAIG.
 
-        Parameters
-        ----------
-        saiglist : list of SAIGs
-            List of SAIGs to combine. Order is irrelevant.
-        angle_range : list, optional
-            List of min and max angle (order irrelevant) over which to 
-            combine the SAIGs.
-            Default is calculated by the lowest and highest values in 
-            the SAIG list.
-        zen_angle_range : list, optional
-            List of min and max zenith angle (order irrelevant) over which to
-            combine the SAIGs.
-            Default is calculated by the lowest and highest values in 
-            the SAIG list.
-
-        Notes
-        -----
-        Uses linear average of retrieved radiance vectors. This does not scale
-        or process the vectors in any way.
-        """
-        ascale = []
-        zscale = []
-        depth_test = saiglist[0].depth
-        amin, amax = saiglist[0].angle_range
-        zmin, zmax = saiglist[0].zen_angle_range
-        # Find the highest resolutions and ensure compatibility
-        for saig in saiglist:
-            assert saig.depth == depth_test, "Incompatible SAIG data."
-            tmp = saig._anchor_scale
-            tamin, tamax = saig.angle_range
-            tzmin, tzmax = saig.zen_angle_range
-            amin = min(amin,tamin)
-            amax = max(amax,tamax)
-            zmin = min(zmin,tzmin)
-            zmax = max(zmax,tzmax)
-            ascale.append(tmp[0][1])
-            zscale.append(tmp[1][1])
-        ascale = min(ascale)
-        zscale = min(zscale)
-        # Setup for new SAIG
-        if angle_range:
-            # If the min [zen]angle is greater than the min range, it is changed
-            angler = list(sorted(angle_range))
-            angler[0] = max(angler[0],amin)
-        else:
-            angler = [amin,amax]
-        if zen_angle_range:
-            zangler = list(sorted(zen_angle_range))
-            zangler[0] = max(zangler[0],zmin)
-        else:
-            zangler = [zmin,zmax]
-        if angler[0]>amax or zangler[0]>zmax:
-            raise IndexError("Incompatible combination instructions. \
-                Please check the input ranges against desired SAIGs.")
-        dim1 = ceil((angler[1]-angler[0]) / ascale)
-        dim2 = ceil((zangler[1]-zangler[0]) / zscale)
-        ai2a = lambda i: (i * ascale) + angler[0]
-        zi2a = lambda i: (i * zscale) + zangler[0]
-        angler[1] = ai2a(dim1-1)
-        zangler[1] = zi2a(dim2-1)
-        # Ensure that the angle ranges are valid. Tweak them if not.
-        # This will be skipped nicely if the ranges are defaulted
-        speak_up_a = False
-        while angler[1] > amax:
-            speak_up_a = True
-            dim1 -= 1
-            angler[1] = ai2a(dim1-1)
-        if speak_up_a:
-            warnings.warn("Angle range maximum changed to {:1.2f}...degrees.".format(angler[1]))
-        speak_up_z = False
-        while zangler[1] > zmax:
-            speak_up_z = True
-            dim2 -= 1
-            zangler[1] = zi2a(dim2-1)
-        if speak_up_z:
-            warnings.warn("Zenith angle range maximum changed to {:1.2f}...degrees.".format(zangler[1]))
-        # Compute the output data
-        dataGrid = np.empty((dim1,dim2,depth_test))
-        for ii in range(dim1):
-            for jj in range(dim2):
-                count = 0
-                tmp = np.zeros(depth_test)
-                angle = ai2a(ii)
-                zangle = zi2a(ii)
-                for saig in saiglist:
-                    try:
-                        tmp += saig.get(angle,zangle)
-                        count += 1
-                    except IndexError:
-                        continue
-                dataGrid[ii,jj] = tmp / count
-        return SAIG(dataGrid, angler, zangler)
+class dummySAIG(SAIG):
+    """Dummy SAIG class when the output is constant."""
+    def __init__(self, output_val):
+        self._value = output_val
+        return
+    def get(self, zen_angle, az_angle):
+        return self._value

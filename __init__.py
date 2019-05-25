@@ -24,6 +24,9 @@ atm_key = _core.atm_key
 bg_key = _core.bg_key
 targ_key = _core.targ_key
 
+# ---------- Global parameters ---------- #
+Verbose = True
+
 
 # ---------- Basic recipes ---------- #  
 # Recipe template
@@ -53,9 +56,11 @@ default = {
 simple = {
         plug_key: {
                 atm_key: 'rttov',
+                bg_key: 'lambertian',
             },
         input_key: {
                 atm_key: plug_params(atm_key, 'rttov'),
+                bg_key: plug_params(bg_key, 'lambertian'),
             },
     }
 
@@ -95,14 +100,14 @@ class Recipe(namedDict):
         for key in self[input_key].keys():
             self[input_key][key] = namedDict(**self[input_key][key])
         # Pre-initialize
-        self.coreInst = {}
-        self.Data = None
+        self.coreInst = 0
+        self.Data = 0
         return
 
     def __del__(self):
         """Makes sure to stop the associated plugins."""
         for mod in self.coreInst.keys():
-            self.coreInst[mod]['plugObj'].stop()
+            self.coreInst[mod][plug_key].stop()
     
     def loadDefaultInputs(self):
         """Load the default plugin inputs."""
@@ -115,18 +120,25 @@ class Recipe(namedDict):
     def _gen_core_instructions(self):
         """Converts the Plugin/Input setup into instructions used by the core
         module."""
+        tmp_coreInst = {}
         for mod in self[plug_key].keys():
+            inputs = self[input_key][mod]
+            tmp_coreInst[mod] = {}
             # Check for a newly loaded plugin
             if (self.coreInst and self[plug_key][mod]!=self._formerPlugs[mod]):
-                self.coreInst['plugObj'].stop()
+                self.coreInst[plug_key].stop()
                 self._formerPlugs[mod] = self[plug_key][mod]
-            self.coreInst[mod] = {}
-            inputs = self[input_key][mod]
-            plugObj = load_plug(mod, self[plug_key][mod], **inputs['start'])
+                plugObj = load_plug(mod, self[plug_key][mod], **inputs['start'])
+            elif not self.coreInst:
+                tmp_coreInst[mod] = {}
+                plugObj = load_plug(mod, self[plug_key][mod], **inputs['start'])
+            else:
+                plugObj = self.coreInst[mod][plug_key]
             plugFunc = lambda inps: _resources.plugins.run(plugObj, inps)
-            self.coreInst[mod]['plugObj'] = plugObj
-            self.coreInst[mod][plug_key] = plugFunc
-            self.coreInst[mod][input_key] = inputs
+            # tmp_coreInst[mod]['plugObj'] = plugObj
+            tmp_coreInst[mod][plug_key] = plugObj
+            tmp_coreInst[mod][input_key] = inputs
+        self.coreInst = tmp_coreInst.copy()
 
     def run(self):
         """Runs the PyRATE simulation."""

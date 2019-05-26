@@ -17,6 +17,7 @@ from pyrate.core.saig import SAIG
 # Mount points
 MOUNT_DIR_HOST = os.path.dirname(os.path.abspath(__file__)) + '/app'
 MOUNT_DIR_CLIENT = '/usr/src/app'
+RTTOV_DOCK_NAME = 'rttov:latest'
 
 # Data directory
 DATA_DIR = '{}/{}'.format(MOUNT_DIR_HOST, ri.DATA_DIR)
@@ -41,12 +42,11 @@ def clean():
 
 class Plugin(atm.BaseAtmPlugin):
     """Rttov plugin."""
-    image = 'jpohlmann93/rttov:latest'
     run_cmd = 'bash -c "python ./rttov.py < controller"'
 
     def __init__(self):
         """Use this to initialize the docker container."""
-        self.container = DOCK_CLIENT.containers.run(self.image,
+        self.container = DOCK_CLIENT.containers.run(RTTOV_DOCK_NAME,
                 command=self.run_cmd,
                 detach=True,
                 remove=True,

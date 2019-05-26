@@ -46,6 +46,7 @@ def run():
         HDSTRUCT['last'].append(__name__)
         pyrate.core.outgoing.run()
         HDSTRUCT['last'].append(__name__)
+        ec = 0
     except:
         e, d, tb = sys.exc_info()
         last = HDSTRUCT['last'][-1]
@@ -59,9 +60,10 @@ def run():
         traceback.print_tb(tb)
         print()
         print("Check HDSTRUCT['last'] for a trace of modules.")
+        ec = 1
     finally:
         """Format the output data."""
-        return HDSTRUCT
+        return ec
 
 
 # Test function; super basic

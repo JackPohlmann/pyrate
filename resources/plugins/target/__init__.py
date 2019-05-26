@@ -3,7 +3,7 @@ import importlib as il
 import pyrate.core
 import pyrate.resources.plugins as plugins
 from pyrate.core.target import BaseTarget 
-from pyrate.core.keys import bg_key, targ_key, wav_key
+from pyrate.core.keys import bg_key, down_key, targ_key, wav_key
 
 
 # Plugins list
@@ -11,6 +11,9 @@ Plugins = []
 
 def get_background():
     return pyrate.core.HDSTRUCT[bg_key]
+
+def get_downwell():
+    return pyrate.core.HDSTRUCT[down_key]
 
 def get_wavenums():
     return pyrate.core.HDSTRUCT[wav_key]

@@ -136,11 +136,14 @@ class Recipe(namedDict):
         """Runs the PyRATE simulation."""
         if not self.coreInst: self._gen_core_instructions()
         _core.init(self.coreInst)
-        _core.run()
+        ec = _core.run()
         self.Data = _core.HDSTRUCT.copy()
         _ = self.Data.pop('last')
         self.Data = namedDict(**self.Data)
-        print('Finished.')
+        if ec:
+            print('An error occured. Intermediate data has been saved.')
+        else:
+            print('Finished.')
         return
 
     def tree(self):

@@ -9,7 +9,7 @@ import pprint
 import pyrate
 
 
-# Set up a nicely formatted print function
+# Set up a nicely formatted print function for printing dicts:
 pp = pprint.PrettyPrinter(indent=4)
 mprint = pp.pprint
 
@@ -19,42 +19,47 @@ mprint(pyrate.template)  # The template is a dictionary setup for instructions
 # Compare this to the default instructions:
 mprint(pyrate.default)
 
-# Now, initialize a Recipe
+# Now, initialize a Recipe:
 myRecipe = pyrate.Recipe()
 
-# Initializing an empty Recipe automatically sets the default instructions
-# This can be tested by initializing a different recipe with instructions
+# Initializing an empty Recipe automatically sets the default instructions.
+# Test this by initializing a new recipe and specifying the instructions:
 testRecipe = pyrate.Recipe(pyrate.default)
 print(myRecipe==testRecipe)
 
-# The asDict method allows the Recipe to be viewed as a dictionary
-# This is especially useful for looking at the hierarchy
+# The asDict method allows the Recipe to be viewed as a dictionary.
+# This is especially useful for looking at the hierarchy:
 mprint(myRecipe.asDict())
 
-# Notice how there are extra keys 'coreInst' and 'Data'
+# Notice how the recipe has extra keys 'coreInst' and 'Data'.
 # These keys store values that set, load, and run the core module and hold the 
-# generated output
+# generated output.
 
 # Also note that setting values to this dictionary do not persist...
 myRecipe.asDict()['Plugins']['atmosphere'] = 'foo'
 print(myRecipe.asDict()['Plugins']['atmosphere'])
 
-# but doing so with the Recipe itself does!
+# ...but doing so with the Recipe itself does!
 myRecipe['Plugins']['atmosphere'] = 'foo'
 print(myRecipe.asDict()['Plugins']['atmosphere'])
 
-# Set the value back using the named convention of the PyRATE Recipes
+# Now set the value back using the named convention of the PyRATE Recipes:
 myRecipe.Plugins.atmosphere = 'rttov'
 print(myRecipe.asDict()['Plugins']['atmosphere'])
 
-# Or list the possible settings using the keys method
+# Or list the possible settings using the keys method:
 print(myRecipe.Plugins.keys())
 
-# Finally, running a recipe is very simple
+# Finally, running a recipe is very simple:
 myRecipe.run()
 
-# Once it is finished, check out what data was generated
+# Once it is finished, check out what data was generated:
 myRecipe.Data.keys()
 
-# Combined with the inputs specified in Recipe.Inputs, all data at every stage
-# is preseverd
+# Combined with the inputs specified in Recipe.Inputs, the data at every stage
+# is preseverd.
+
+# As a final note, all data objects aside from wavenums are SAIGs, or Solid-
+# Angle Interpolation Grid. Accessing the per-channel output is accomplished by
+# using the get(zenith, azimuth) method, in degrees.
+print(myRecipe.Data.pixel.get(0,0))

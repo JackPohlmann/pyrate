@@ -62,6 +62,5 @@ class Plugin(bg.BaseBgPlugin):
         background = saig.dummySAIG(lambda zen, az: \
                     self.refl*self.integrated_rad/pi + \
                     self.emiss*self.emitted)
-        out = bg.Background(**{bg_key:background})
-        out._integrated_rad = self.integrated_rad
-        return out
+        background._integrated_rad = self.integrated_rad
+        return bg.Background(**{bg_key:background})

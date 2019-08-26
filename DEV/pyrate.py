@@ -1,29 +1,26 @@
 #!/usr/bin/env python3
-# PyRate CLI
+# PyRate: Python Radiometric Target Embedder
 # Author: Jack Pohlmann
 # Date: Aug, 2019
 # 
-# This is the initial framework for the PyRate CLI.
-# The reason for maintaining a CLI for this project is to simplify the process
-# of managing plugins (ie. installation and removal) as well as act as a
-# wrapper for managing the PyRate docker environment without needing to use
-# docker directly. This should remove some usage overhead.
-#
-# NOTE: This file should not be imported as the PyRate module. This is a
-# command-line interface for the controlling the PyRate installation and should
-# be run as a standalone script.
+# PyRate CLI.
+# NOTE: This is not the PyRate python module. See __init__.py.
 #
 #
 # Comment syntax:
 # 
-# ############ [parent_cmd] ############
-# Top-level command; pyrate [parent_cmd]
-# 
-# #### [child_cmd]
-# Lower-level command; pyrate [parent_cmd] [child_cmd]
-# 
-# # comment
-# Regular comment
+#| ############ [arg] ############
+#| Top-level command: pyrate [arg]
+#|  
+#| #### [subarg]
+#| Lower-level command: pyrate [arg] [subarg]
+#| 
+#| # comment
+#| Regular comment
+#| 
+#| # {{{X
+#| # }}}X
+#| Vim manual folds (dev)
 
 import argparse
 
@@ -37,7 +34,9 @@ parser.add_argument(
         version=f'%(prog)s {VERSION}')
 subparser = parser.add_subparsers()
 
+
 ############ PLUGIN ############
+# {{{1
 plugin_desc = "manage plugins."
 plugin_parser = subparser.add_parser(
         'plugin',
@@ -45,6 +44,7 @@ plugin_parser = subparser.add_parser(
 plugin_sp = plugin_parser.add_subparsers()
 
 #### LIST
+# {{{2
 list_desc = "list plugins."
 plugin_list = plugin_sp.add_parser(
         'list',
@@ -68,8 +68,10 @@ plugin_list.add_argument(
         '-t','--tracked',
         action='store_true',
         help="list tracked (uncommitted) plugins.")
+# }}}2
 
 #### INSTALL
+# {{{2
 plug_install_desc = "install given plugins."
 plugin_install = plugin_sp.add_parser('install',
         description=plug_install_desc,help=plug_install_desc)
@@ -93,8 +95,10 @@ plugin_install.add_argument(
         metavar='path',
         default=None,
         help="path to local installation of plugin source.")
+# }}}2
 
 #### REMOVE
+# {{{2
 plug_remove_desc = "remove plugins."
 plugin_remove = plugin_sp.add_parser('remove',
         description=plug_remove_desc,help=plug_remove_desc)
@@ -108,14 +112,18 @@ plugin_remove.add_argument(
         'mods',
         nargs='*',
         help="plugins to remove.")
+# }}}2
+# }}}1
+
 
 ############ DOCKER ############
+# {{{1
 docker_desc = "manage the PyRate docker container."
 docker_parser = subparser.add_parser(
         'docker',
         description=docker_desc,help=docker_desc)
 # TODO: use the python-docker library to manage the docker container.
-
+# }}}1
 
 
 # Main

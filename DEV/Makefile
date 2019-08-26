@@ -1,5 +1,8 @@
 # Need to find a balance for installation.
 # Can setup.py be used in a similar manner to Makefile?
+#
+# NOTE: Makefile can be used inside the container, but setup.py should be used
+# 	for the primary installation since it is OS-agnostic.
 
 NAME = pyrate
 VERSION = $(shell grep -m 1 'VERSION' pyrate.py | awk '{ print $3 }')

@@ -1,4 +1,4 @@
-# DEV folder
+# Welcome to the pyrate/DEV/ directory! 
 
 Use this directory as a temporary "root" folder until the structure is transferred.
 

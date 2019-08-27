@@ -10,6 +10,8 @@ Use this directory as a temporary "root" folder until the structure is transferr
 
 ## NOTES
 
+- Before deployment, change the 'DEV/' directory to 'pyrate/', and use setuptools to package it.
+
 - As an example, the Docker python module has a file named 'constants.py'.
   This seems similar to the pyrate 'keys.py' but could be extended (there is precedent!)
 

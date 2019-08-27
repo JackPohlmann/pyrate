@@ -1,38 +1,49 @@
 #!/usr/bin/env python3
+# vim: fdm=marker
+#
 # PyRate: Python Radiometric Target Embedder
 # Author: Jack Pohlmann
 # Date: Aug, 2019
 # 
 # PyRate CLI.
-# NOTE: This is not the PyRate python module. See __init__.py.
+# NOTE: This is not the PyRate python module. See pyrate/__init__.py.
 #
 #
 # Comment syntax:
 # 
-#| ############ [arg] ############
-#| Top-level command: pyrate [arg]
-#|  
-#| #### [subarg]
-#| Lower-level command: pyrate [arg] [subarg]
-#| 
-#| # comment
-#| Regular comment
-#| 
-#| # {{{X
-#| # }}}X
-#| Vim manual folds (dev)
+# ############ [arg] ############
+# Top-level command: pyrate [arg]
+#  
+# #### [subarg]
+# Lower-level command: pyrate [arg] [subarg]
+# 
+# # comment
+# Regular comment
 
 import argparse
 
-VERSION = "0.1.1"
-DESCRIPTION = "CLI for managing PyRate installation."
+import pyrate
+import pyrate.plugins as plugins
 
-parser = argparse.ArgumentParser(description=DESCRIPTION,prog='PyRate')
+
+parser = argparse.ArgumentParser(
+        description=pyrate.__description__,
+        prog='PyRate',
+    )
 parser.add_argument(
         '--version',
         action='version',
-        version=f'%(prog)s {VERSION}')
+        version=f'%(prog)s {pyrate.__version__}',
+    )
 subparser = parser.add_subparsers()
+
+def set_help_default(some_parser):
+    """Set a (sub)parser's default behavior to display its help text.'"""
+    some_parser.set_defaults(
+            func=(lambda *args: some_parser.parse_args(['--help'])))
+    return
+
+set_help_default(parser)
 
 
 ############ PLUGIN ############
@@ -41,6 +52,7 @@ plugin_desc = "manage plugins."
 plugin_parser = subparser.add_parser(
         'plugin',
         description=plugin_desc,help=plugin_desc)
+set_help_default(plugin_parser)
 plugin_sp = plugin_parser.add_subparsers()
 
 #### LIST
@@ -61,6 +73,11 @@ def do_plugin_list(args):
 plugin_list.set_defaults(func=do_plugin_list)
 # Opts
 plugin_list.add_argument(
+        '-l','--loud',
+        action='store_true',
+        help="more detailed descriptions."
+        )
+plugin_list.add_argument(
         '-i','--installed',
         action='store_true',
         help="list installed (committed) plugins.")
@@ -72,29 +89,65 @@ plugin_list.add_argument(
 
 #### INSTALL
 # {{{2
-plug_install_desc = "install given plugins."
+plug_install_desc = "install a plugin."
 plugin_install = plugin_sp.add_parser('install',
         description=plug_install_desc,help=plug_install_desc)
 def do_plugin_install(args):
     """Install plugins."""
-    if args.local:
-        """This should just change the path to the source."""
-        print(f"Checking path {args.local}")
-    for mod in args.mods:
-        if args.local: print("\t",end='')
-        print(f"This would install \"{mod}\" if it existed...")
+    plugins.install(
+            args.plugin,
+            plug_name=args.name,
+            src_dir=args.src_dir,
+            src_install_cmd=args.src_install_cmd,
+            run_test=args.test
+        )
+    return
+
 plugin_install.set_defaults(func=do_plugin_install)
 # Args
 plugin_install.add_argument(
-        'mods',
-        nargs='*',
-        help="plugins to install.")
+        'plugin',
+        help="plugin to install."
+    )
 # Opts
 plugin_install.add_argument(
-        '-l','--local',
-        metavar='path',
-        default=None,
-        help="path to local installation of plugin source.")
+        '-n','--name',
+        help="name of plugin once installed.",
+    )
+plugin_install.add_argument( #Might be unnecessary
+        '--src-dir',
+        help="directory of plugin source."
+    )
+plugin_install.add_argument(
+        '--src-install-cmd',
+        help="command to run to install the plugin source.",
+    )
+plugin_install.add_argument(
+        '-t','--test',
+        help="test plugins to install.",
+        action='store_true',
+    )
+# }}}2
+
+#### UNINSTALL
+# {{{2
+plug_uninstall_desc = "uninstall a plugin."
+plugin_uninstall = plugin_sp.add_parser('uninstall',
+        description=plug_uninstall_desc,help=plug_uninstall_desc)
+def do_plugin_uninstall(args):
+    """Uninstall plugins."""
+    plugins.uninstall(
+            args.plugin,
+        )
+    return
+
+plugin_uninstall.set_defaults(func=do_plugin_uninstall)
+# Args
+plugin_uninstall.add_argument(
+        'plugin',
+        help="plugin to uninstall."
+    )
+
 # }}}2
 
 #### REMOVE
@@ -116,12 +169,13 @@ plugin_remove.add_argument(
 # }}}1
 
 
-############ DOCKER ############
+############ CONTAINER ############
 # {{{1
-docker_desc = "manage the PyRate docker container."
-docker_parser = subparser.add_parser(
-        'docker',
-        description=docker_desc,help=docker_desc)
+container_desc = "manage the PyRate container container."
+container_parser = subparser.add_parser(
+        'container',
+        description=container_desc,help=container_desc)
+set_help_default(container_parser)
 # TODO: use the python-docker library to manage the docker container.
 # }}}1
 

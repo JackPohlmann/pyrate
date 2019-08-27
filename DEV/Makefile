@@ -1,5 +1,4 @@
-# Need to find a balance for installation.
-# Can setup.py be used in a similar manner to Makefile?
+# Remove in favor of setup.py
 #
 # NOTE: Makefile can be used inside the container, but setup.py should be used
 # 	for the primary installation since it is OS-agnostic.

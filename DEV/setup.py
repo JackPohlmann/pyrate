@@ -38,7 +38,7 @@ def build_scripts(*scripts):
 
 def main():
     setup(
-            name='PyRate',
+            name='pyrate',
             description=pyrate.__description__,
             version=pyrate.__version__,
             author=pyrate.__author__,

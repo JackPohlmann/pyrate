@@ -6,11 +6,16 @@ Use this directory as a temporary "root" folder until the structure is transferr
 ## Dependencies
 
 - Python 3 (written in python3.7)
+- NumPy, SciPy(?), H5Py
+- (Optionally) python-docker
 
 
 ## NOTES
 
-- Before deployment, change the 'DEV/' directory to 'pyrate/', and use setuptools to package it.
+- STOP TRYING TO HAVE A LOCAL AND DOCKER INSTALLATION THAT COMMUNICATE!
+  This is a total overcomplication. Docker is designed to eliminate this.
+  - Allow the user to decide how they would like to operate the system, but give them some basic
+    tools for installing either locally (setup.py) or in a container (Dockerfile).
 
 - As an example, the Docker python module has a file named 'constants.py'.
   This seems similar to the pyrate 'keys.py' but could be extended (there is precedent!)
@@ -21,15 +26,8 @@ Use this directory as a temporary "root" folder until the structure is transferr
 - Favor setup.py over makefile!
   * Makefile depends on a UNIX-like environment (ie. cygwin on Windows).
     This has obvious downsides for Windows machines!
-  * Looking at the below points: a makefile can be included in the docker installing.
 
-- Should HDF5 be a mandatory specification? (Probably?)
-
-- Should data be passed directly between sections or written to temporary files?
-
-- Refrain from using shell scripts (possible Windows use). Rely on Python scripts
-  in order to manage the Docker container. 
-  *  Shell scripts can be used within the Docker container, but shouldn't be used outside of it.
+- Should HDF5 be a mandatory specification?
 
 
 ## Local installation files
@@ -38,10 +36,3 @@ Use this directory as a temporary "root" folder until the structure is transferr
     * $PYRATE_INSTALL_DIR, etc.?
     * DO NOT EDIT DIRECTLY
     * Should be hosted on the LOCAL host and used by the DOCKER container.
-
-*   pyrate.config [?]
-    Configuration file for
-    
-*   <plugin_name>/
-    Installation directories for plugin dependencies.
-

@@ -1,0 +1,12 @@
+#!/bin/bash
+# Fetch and install HDF5
+wget ${HDF5_SRC_URL}/${HDF5_MINOR_REL}/src/${HDF5_MINOR_REL}.tar.gz
+tar -xvf ${HDF5_MINOR_REL}.tar.gz --directory /usr/local/src
+rm ${HDF5_MINOR_REL}.tar.gz
+cd /usr/local/src/${HDF5_MINOR_REL}
+./configure --enable-fortran --prefix=/usr/local/hdf5
+make
+#make check
+make install
+#make check-install
+for f in /usr/local/hdf5/bin/* ; do ln -s $f /usr/local/bin ; done 
